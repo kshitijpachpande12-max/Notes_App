@@ -5,21 +5,33 @@ import dns from 'dns';
 import dotenv from "dotenv";
 import rateLimiter from './middleware/ratelimiter.js';
 import cors from "cors";
+import path from "path";
 
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 dotenv.config();
 
-const PORT = process.env.PORT;
-
+const PORT = process.env.PORT || 5001;
 const app = express();
-app.use(cors({
-    origin: "http://localhost:5173",
-}));
+const __dirname = path.resolve();
+
+if(process.env.NODE_ENV !== "production"){
+    app.use(cors({
+        origin: "http://localhost:5173",
+    }));
+}
 app.use(express.json());
 app.use(rateLimiter);
 
 app.use("/api/notes", notesRoutes);
+
+if(process.env.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname,"../frontend/dist")));
+
+    app.get("*",(req,res)=>{
+        res.sendFile(path.join(__dirname,"../frontend","dist","index.html"));
+    });
+}
 
 connectDB().then(()=>{
     app.listen(PORT , ()=> {

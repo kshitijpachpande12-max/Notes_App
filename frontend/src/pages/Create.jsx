@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Link,useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
 import axios  from 'axios';
+import api from '../lib/axios';
 
 const Create = () => {
   const [title,setTitle] = useState("");
@@ -18,7 +19,7 @@ const Create = () => {
     }
     setLoading(true);
     try {
-      await axios.post("http://localhost:5001/api/notes",{
+      await api.post("/notes",{
         title,
         content
       });
